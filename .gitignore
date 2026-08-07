@@ -1,0 +1,15 @@
+frontend/node_modules
+frontend/.env.local
+backend/.env
+backend/node_modules
+/node_modules
+coverage/
+.idea/
+# Local Terraform files
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfvars
+*.tfplan
+.terraform.lock.hcl
