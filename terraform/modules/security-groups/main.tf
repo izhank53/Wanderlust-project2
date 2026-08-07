@@ -134,3 +134,22 @@ resource "aws_security_group" "redis" {
     ManagedBy   = "Terraform"
   }
 }
+
+resource "aws_security_group" "eks_cluster" {
+  vpc_id      = var.vpc_id
+  description = "Security Group for EKS Cluster Control Plane"
+
+  egress {
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name        = "${var.project_name}-${var.environment}-eks-cluster-sg"
+    Project     = var.project_name
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
+}

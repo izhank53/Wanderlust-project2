@@ -37,3 +37,8 @@ output "redis_security_group_id" {
   value       = aws_security_group.redis.id
   sensitive   = false # Set to true if it contains passwords, keys, or secrets
 }
+
+output "eks_cluster_sg_id" {
+  description = "EKS Cluster Security Group ID"
+  value       = aws_security_group.eks_cluster.id
+}

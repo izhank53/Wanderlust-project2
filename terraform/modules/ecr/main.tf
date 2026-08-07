@@ -3,11 +3,11 @@ resource "aws_ecr_repository" "frontend" {
   image_tag_mutability = "MUTABLE"
   
   image_scanning_configuration {
-    scan_on_push = "true"
+    scan_on_push = true
   }
 
   tags = {
-    Name        = "${var.project_name}-${var.environment}-eks-cluster-role"
+    Name        = "${var.project_name}-${var.environment}-frontend"
     Project     = var.project_name
     Environment = var.environment
     ManagedBy   = "Terraform"
