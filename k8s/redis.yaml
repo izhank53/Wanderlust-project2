@@ -1,0 +1,43 @@
+apiVersion: apps/v1  # 1. API version for Deployments
+kind: Deployment     # 2. Type of Kubernetes resource
+metadata:
+  name: redis        # 3. Name of this Deployment object
+  namespace: wanderlust # 4. Namespace where this Deployment lives
+spec:                # 5. Desired state configuration starts here
+  replicas: 1        # 6. Maintain exactly 1 running Pod instance
+
+  selector:          # 7. Tells Deployment how to find the Pods it controls
+    matchLabels:
+      app: redis     # 8. Manage any Pod with label 'app: redis'
+
+  template:          # 9. Blueprint/Template used to create new Pods
+    metadata:
+      labels:
+        app: redis   # 10. Label assigned to Pods created by this template
+    
+    spec:            # 11. Container specification for the Pod
+      containers:
+        - name: redis     # 12. Name of the container inside the Pod
+          image: redis:7  # 13. Docker image pulled from Docker Hub
+          ports:
+            - containerPort: 6379 # 14. Port Redis listens on inside the container
+
+---
+
+#Service
+apiVersion: v1      # 2. Core API group for Services
+kind: Service       # 3. Type of resource (Internal Load Balancer/DNS)
+metadata:
+  name: redis       # 4. Service name (also becomes its DNS address: 'redis')
+  namespace: wanderlust # 5. Namespace where the Service lives
+
+spec: 
+  selector:
+    app: redis      # 6. Route incoming traffic to Pods with label 'app: redis'
+
+  ports:            # 7. Port mapping rules
+    - port: 6379    # 8. Port exposed by this Service inside the cluster
+      targetPort: 6379 # 9. Port on the Pod/container to forward traffic to
+
+  type: ClusterIP   # 10. Makes service reachable ONLY inside the EKS cluster
+  

@@ -89,3 +89,91 @@ resource "aws_iam_role_policy_attachment" "eks_container_registry" {
   role       = aws_iam_role.eks_nodes.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
+
+data "aws_iam_policy_document" "aws_load_balancer_controller_assume_role" {
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "sts:AssumeRole",
+      "sts:TagSession"
+    ]
+
+    principals {
+      type = "Service"
+
+      identifiers = [
+        "pods.eks.amazonaws.com"
+      ]
+    }
+  }
+}
+
+resource "aws_iam_role" "aws_load_balancer_controller" {
+  name = "${var.project_name}-${var.environment}-aws-load-balancer-controller-role"
+
+  assume_role_policy = data.aws_iam_policy_document.aws_load_balancer_controller_assume_role.json
+
+  tags = {
+    Name        = "${var.project_name}-${var.environment}-aws-load-balancer-controller-role"
+    Project     = var.project_name
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
+}
+
+resource "aws_iam_policy" "aws_load_balancer_controller" {
+  name = "${var.project_name}-${var.environment}-aws-load-balancer-controller-policy"
+
+  policy = file("${path.module}/aws-load-balancer-controller-policy.json")
+
+  tags = {
+    Name        = "${var.project_name}-${var.environment}-aws-load-balancer-controller-policy"
+    Project     = var.project_name
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "aws_load_balancer_controller" {
+  role = aws_iam_role.aws_load_balancer_controller.name
+
+  policy_arn = aws_iam_policy.aws_load_balancer_controller.arn
+}
+
+data "aws_iam_policy_document" "ebs_csi_driver_assume_role" {
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "sts:AssumeRole",
+      "sts:TagSession"
+    ]
+
+    principals {
+      type = "Service"
+
+      identifiers = [
+        "pods.eks.amazonaws.com"
+      ]
+    }
+  }
+}
+
+resource "aws_iam_role" "ebs_csi_driver" {
+  name = "${var.project_name}-${var.environment}-ebs-csi-driver-role"
+
+  assume_role_policy = data.aws_iam_policy_document.ebs_csi_driver_assume_role.json
+
+  tags = {
+    Name        = "${var.project_name}-${var.environment}-ebs-csi-driver-role"
+    Project     = var.project_name
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "ebs_csi_driver" {
+  role       = aws_iam_role.ebs_csi_driver.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+}

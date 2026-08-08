@@ -1,0 +1,87 @@
+apiVersion: apps/v1  # 1. API version for Deployments
+kind: Deployment     # 2. Type of Kubernetes resource
+metadata:
+  name: mongodb      # 3. Name of this Deployment object
+  namespace: wanderlust # 4. Namespace where this Deployment lives
+spec:                # 5. Desired state configuration starts here
+  replicas: 1        # 6. Maintain exactly 1 running Pod instance
+
+  selector:          # 7. Tells Deployment how to find the Pods it controls
+    matchLabels:
+      app: mongodb   # 8. Manage any Pod with label 'app: mongodb'
+
+  template:          # 9. Blueprint/Template used to create new Pods
+    metadata:
+      labels:
+        app: mongodb # 10. Label assigned to Pods created by this template
+    
+    spec:            # 11. Container specification for the Pod
+      containers:
+        - name: mongodb   # 12. Name of the container inside the Pod
+          image: mongo:7  # 13. Docker image pulled from Docker Hub
+          
+          ports:
+            - containerPort: 27017 # 14. Port MongoDB listens on inside the container
+
+
+          volumeMounts:
+          - name: mongodb-storage
+            mountPath: /data/db
+
+      volumes:
+      - name: mongodb-storage
+        persistentVolumeClaim:
+          claimName: mongodb-pvc
+---
+
+#Service
+
+apiVersion: v1      # 2. Core API group for Services
+kind: Service       # 3. Type of resource (Internal Load Balancer/DNS)
+metadata:
+  name: mongodb     # 4. Service name (also becomes its DNS address: 'mongodb')
+  namespace: wanderlust # 5. Namespace where the Service lives
+
+spec: 
+  selector:
+    app: mongodb    # 6. Route incoming traffic to Pods with label 'app: mongodb'
+
+  ports:            # 7. Port mapping rules
+    - port: 27017   # 8. Port exposed by this Service inside the cluster
+      targetPort: 27017 # 9. Port on the Pod/container to forward traffic to
+
+  type: ClusterIP   # 10. Makes service reachable ONLY inside the EKS cluster
+
+---
+#storage Class
+
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: mongodb-gp3
+provisioner: ebs.csi.aws.com
+volumeBindingMode: WaitForFirstConsumer
+parameters:
+  type: gp3
+  fsType: ext4
+reclaimPolicy: Delete
+
+---
+
+#PVC
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-pvc
+  namespace: wanderlust
+
+spec:
+  accessModes:
+    - ReadWriteOnce
+
+  storageClassName: mongodb-gp3
+
+  resources:
+    requests:
+      storage: 10Gi
