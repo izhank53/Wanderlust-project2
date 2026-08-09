@@ -291,7 +291,7 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
       variable = "token.actions.githubusercontent.com:sub"
 
       values = [
-        "repo:izhank53/Wanderlust-project2:*"
+        "repo:izhank53@150195246/Wanderlust-project2@1307791443:ref:refs/heads/main"
       ]
     }
   }
