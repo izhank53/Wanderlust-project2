@@ -20,17 +20,45 @@ spec:
       containers:
         - name: backend
 
-          image: 085470048226.dkr.ecr.ap-south-2.amazonaws.com/wanderlust-dev-backend:dev
+          image: 085470048226.dkr.ecr.ap-south-2.amazonaws.com/wanderlust-dev-backend:v2
 
           ports:
             - containerPort: 5000
 
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 20
+            periodSeconds: 20
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
           env:
             - name: MONGODB_URI
-              value: "mongodb://mongodb:27017/wanderlust"
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: MONGODB_URI
 
             - name: REDIS_URL
-              value: "redis://redis:6379"
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: REDIS_URL
 
 ---
 apiVersion: v1
@@ -48,3 +76,41 @@ spec:
       targetPort: 5000
 
   type: ClusterIP
+
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: wanderlust
+
+data:
+  MONGODB_URI: "mongodb://mongodb:27017/wanderlust"
+  REDIS_URL: "redis://redis:6379"
+
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: backend-hpa
+  namespace: wanderlust
+
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: backend
+
+  minReplicas: 2
+  maxReplicas: 5
+
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70

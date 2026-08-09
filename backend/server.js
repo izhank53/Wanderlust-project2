@@ -30,6 +30,10 @@ app.get('/', (req, res) => {
   res.send('Yay!! Backend of wanderlust app is now accessible');
 });
 
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "UP" });
+});
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
