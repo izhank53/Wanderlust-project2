@@ -287,11 +287,11 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
     }
 
     condition {
-      test     = "StringEquals"
+      test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
 
       values = [
-        "repo:izhank53/Wanderlust-project2:ref:refs/heads/main"
+        "repo:izhank53/Wanderlust-project2:*"
       ]
     }
   }
