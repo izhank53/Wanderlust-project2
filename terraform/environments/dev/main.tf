@@ -32,6 +32,8 @@ module "iam" {
 
   project_name = var.project_name
   environment  = var.environment
+
+  aws_region = var.aws_region
 }
 
 module "eks" {
@@ -45,6 +47,7 @@ module "eks" {
   node_role_arn             = module.iam.node_role_arn
   cluster_security_group_id = module.security_groups.eks_cluster_security_group_id
 }
+
 
 # Terraform Modules
 

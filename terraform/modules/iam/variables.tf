@@ -6,3 +6,7 @@ variable "environment" {
   type = string
 }
 
+variable "aws_region" {
+  description = "Aws region udner which resources will be deployed "
+  type        = string
+}
