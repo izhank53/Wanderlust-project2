@@ -134,6 +134,46 @@ jobs:
         run: npm ci
         working-directory: frontend
 
+      - name: Debug GitHub OIDC Claims
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os
+          import json
+          import base64
+          import urllib.request
+
+          url = os.environ["ACTIONS_ID_TOKEN_REQUEST_URL"]
+          token = os.environ["ACTIONS_ID_TOKEN_REQUEST_TOKEN"]
+
+          req = urllib.request.Request(
+              url,
+              headers={
+                  "Authorization": f"bearer {token}"
+              }
+          )
+
+          with urllib.request.urlopen(req) as response:
+              data = json.load(response)
+
+          jwt = data["value"]
+          payload = jwt.split(".")[1]
+          payload += "=" * (-len(payload) % 4)
+
+          claims = json.loads(
+              base64.urlsafe_b64decode(payload)
+          )
+
+          print("OIDC Claims:")
+          print("aud:", claims.get("aud"))
+          print("sub:", claims.get("sub"))
+          print("repository:", claims.get("repository"))
+          print("ref:", claims.get("ref"))
+          print("repository_owner:", claims.get("repository_owner"))
+          print("event_name:", claims.get("event_name"))
+          PY
+
+
       # - name: Lint
       #   run: npm run lint
       #   working-directory: frontend
