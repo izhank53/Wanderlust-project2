@@ -52,7 +52,7 @@ resource "aws_internet_gateway" "main" {
 }
 
 resource "aws_eip" "eip" {
-  count = length(var.public_subnet_cidrs)
+  count = 1
 
   tags = {
     Name        = "${var.project_name}-${var.environment}-eip-${count.index + 1}"
@@ -65,7 +65,7 @@ resource "aws_eip" "eip" {
 resource "aws_nat_gateway" "nat_gateways" {
   subnet_id     = aws_subnet.public_subnets[count.index].id
   allocation_id = aws_eip.eip[count.index].id
-  count         = length(var.public_subnet_cidrs)
+  count         = 1
 
   tags = {
     Name        = "${var.project_name}-${var.environment}-nat-gateway-${count.index + 1}"
@@ -110,7 +110,7 @@ resource "aws_route_table" "private" {
 
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.nat_gateways[count.index].id
+    nat_gateway_id = aws_nat_gateway.nat_gateways[0].id
   }
 }
 
