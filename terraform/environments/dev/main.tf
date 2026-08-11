@@ -39,13 +39,16 @@ module "iam" {
 module "eks" {
   source = "../../modules/eks"
 
-  project_name = var.project_name
-  environment  = var.environment
-
-  private_subnet_ids        = module.vpc.private_subnet_ids
-  cluster_role_arn          = module.iam.cluster_role_arn
-  node_role_arn             = module.iam.node_role_arn
+  project_name               = var.project_name
+  environment                = var.environment
+  private_subnet_ids       = module.vpc.private_subnet_ids
+  cluster_role_arn         = module.iam.cluster_role_arn
+  node_role_arn            = module.iam.node_role_arn
   cluster_security_group_id = module.security_groups.eks_cluster_security_group_id
+
+  # Pass the role ARNs from IAM module
+  ebs_csi_driver_role_arn               = module.iam.ebs_csi_driver_role_arn
+  aws_load_balancer_controller_role_arn = module.iam.aws_load_balancer_controller_role_arn
 }
 
 

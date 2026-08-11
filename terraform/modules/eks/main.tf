@@ -22,8 +22,8 @@ resource "aws_eks_node_group" "main" {
   subnet_ids      = var.private_subnet_ids
 
   scaling_config {
-    desired_size = 1
-    max_size     = 1
+    desired_size = 2
+    max_size     = 3
     min_size     = 1
   }
 
@@ -44,4 +44,32 @@ resource "aws_eks_node_group" "main" {
 resource "aws_eks_addon" "pod_identity" {
   cluster_name = aws_eks_cluster.main.name
   addon_name   = "eks-pod-identity-agent"
+}
+
+# Add the EBS CSI Driver Add-on
+resource "aws_eks_addon" "ebs_csi" {
+  cluster_name = aws_eks_cluster.main.name
+  addon_name   = "aws-ebs-csi-driver"
+
+  depends_on = [
+    aws_eks_node_group.main,
+    aws_eks_addon.pod_identity,
+    aws_eks_pod_identity_association.ebs_csi
+  ]
+}
+
+# Associate IAM Role to EBS CSI Controller ServiceAccount
+resource "aws_eks_pod_identity_association" "ebs_csi" {
+  cluster_name    = aws_eks_cluster.main.name
+  namespace       = "kube-system"
+  service_account = "ebs-csi-controller-sa"
+  role_arn        = var.ebs_csi_driver_role_arn
+}
+
+# Associate IAM Role to AWS Load Balancer Controller ServiceAccount
+resource "aws_eks_pod_identity_association" "alb_controller" {
+  cluster_name    = aws_eks_cluster.main.name
+  namespace       = "kube-system"
+  service_account = "aws-load-balancer-controller"
+  role_arn        = var.aws_load_balancer_controller_role_arn
 }
