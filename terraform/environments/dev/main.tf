@@ -39,17 +39,26 @@ module "iam" {
 module "eks" {
   source = "../../modules/eks"
 
-  project_name               = var.project_name
-  environment                = var.environment
-  private_subnet_ids       = module.vpc.private_subnet_ids
-  cluster_role_arn         = module.iam.cluster_role_arn
-  node_role_arn            = module.iam.node_role_arn
+  providers = {
+    helm = helm
+  }
+
+  project_name              = var.project_name
+  environment               = var.environment
+  private_subnet_ids        = module.vpc.private_subnet_ids
+  cluster_role_arn          = module.iam.cluster_role_arn
+  node_role_arn             = module.iam.node_role_arn
   cluster_security_group_id = module.security_groups.eks_cluster_security_group_id
+
+  vpc_id     = module.vpc.vpc_id
+  aws_region = var.aws_region
 
   # Pass the role ARNs from IAM module
   ebs_csi_driver_role_arn               = module.iam.ebs_csi_driver_role_arn
   aws_load_balancer_controller_role_arn = module.iam.aws_load_balancer_controller_role_arn
 }
+
+
 
 
 # Terraform Modules

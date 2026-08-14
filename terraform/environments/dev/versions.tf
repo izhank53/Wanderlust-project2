@@ -16,5 +16,11 @@ terraform {
       # use any compatible 6.X aws provider version but dont upgarde to 7.x
       version = "~> 6.40"
     }
+
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 3.0"
+    }
+
   }
 }

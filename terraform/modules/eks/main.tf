@@ -73,3 +73,40 @@ resource "aws_eks_pod_identity_association" "alb_controller" {
   service_account = "aws-load-balancer-controller"
   role_arn        = var.aws_load_balancer_controller_role_arn
 }
+
+resource "helm_release" "aws_load_balancer_controller" {
+  name       = "aws-load-balancer-controller"
+  namespace  = "kube-system"
+  repository = "https://aws.github.io/eks-charts"
+  chart      = "aws-load-balancer-controller"
+
+  depends_on = [
+    aws_eks_node_group.main,
+    aws_eks_addon.pod_identity,
+    aws_eks_pod_identity_association.alb_controller
+  ]
+
+  set = [
+    {
+      name  = "clusterName"
+      value = aws_eks_cluster.main.name
+    },
+    
+     {
+  name  = "region"
+  value = var.aws_region
+},
+    {
+      name  = "vpcId"
+      value = var.vpc_id
+    },
+    {
+      name  = "serviceAccount.create"
+      value = "true"
+    },
+    {
+      name  = "serviceAccount.name"
+      value = "aws-load-balancer-controller"
+    }
+  ]
+}
