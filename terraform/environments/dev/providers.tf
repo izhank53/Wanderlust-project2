@@ -10,22 +10,15 @@ provider "aws" {
   }
 }
 
-data "aws_eks_cluster" "main" {
-  name = "wanderlust-dev-cluster"
-}
-
-data "aws_eks_cluster_auth" "main" {
-  name = "wanderlust-dev-cluster"
-}
-
 provider "helm" {
   kubernetes = {
-    host = data.aws_eks_cluster.main.endpoint
+    host                   = module.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
 
-    cluster_ca_certificate = base64decode(
-      data.aws_eks_cluster.main.certificate_authority[0].data
-    )
-
-    token = data.aws_eks_cluster_auth.main.token
+    exec = {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", var.aws_region]
+    }
   }
 }
