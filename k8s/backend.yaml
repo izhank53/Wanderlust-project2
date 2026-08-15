@@ -20,7 +20,7 @@ spec:
       containers:
         - name: backend
 
-          image: 085470048226.dkr.ecr.ap-south-2.amazonaws.com/wanderlust-dev-backend:0d461ecb9338ab27e303d7493b0e38e614f61628
+          image: 085470048226.dkr.ecr.ap-south-2.amazonaws.com/wanderlust-dev-backend:f3c9de05080dad04f4c3a54dde1adfa50a89c6b6
 
           ports:
             - containerPort: 5000
