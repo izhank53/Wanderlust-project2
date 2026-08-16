@@ -39,10 +39,7 @@ module "iam" {
 module "eks" {
   source = "../../modules/eks"
 
-  providers = {
-    helm = helm
-  }
-
+  
   project_name              = var.project_name
   environment               = var.environment
   private_subnet_ids        = module.vpc.private_subnet_ids
