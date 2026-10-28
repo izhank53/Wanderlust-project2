@@ -1,40 +1,17 @@
-name: Terraform EKS Startup
+name: Wanderlust Runner Test
 
 on:
   workflow_dispatch:
 
-permissions:
-  contents: read
-  id-token: write
-
 jobs:
-  verify:
-    runs-on: ubuntu-latest
+  runner-test:
+    runs-on: [self-hosted, Linux, X64]
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Inspect GitHub run context
+      - name: Verify runner
         run: |
-          echo "Repository: $GITHUB_REPOSITORY"
-          echo "Ref: $GITHUB_REF"
-          echo "Event: $GITHUB_EVENT_NAME"
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::085470048226:role/wanderlust-dev-github-actions-role
-          aws-region: ap-south-2
-
-      - name: Verify AWS identity
-        run: aws sts get-caller-identity
-
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
-
-      - name: Initialize Terraform
-        run: terraform -chdir=terraform/environments/dev init -input=false
-
-      - name: Verify Terraform state
-        run: terraform -chdir=terraform/environments/dev state list
+          echo "Running on self-hosted runner"
+          whoami
+          hostname
+          uname -m
+          df -h /
